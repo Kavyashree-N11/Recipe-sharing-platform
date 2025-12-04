@@ -1,0 +1,15 @@
+# Ignore all node_modules in both folders
+node_modules/
+*/node_modules/
+
+# Ignore environment variables (SECURITY RISK if you upload this!)
+.env
+backend/.env
+frontend/.env
+
+# Ignore the uploads folder in backend (contains large images)
+backend/uploads/
+
+# Ignore build files
+build/
+dist/
