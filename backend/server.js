@@ -5,40 +5,47 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+// Removed 'fs' and 'path' because Vercel doesn't allow file creation
 
 const User = require('./models/User');
 const Recipe = require('./models/Recipe');
 
 const app = express();
 
-// --- MIDDLEWARE ---
 app.use(express.json());
 
-// CORS Configuration for Vercel
-// This allows your frontend to talk to this backend
+// CORS Config
 app.use(cors({
-    origin: ["http://localhost:3000", "https://your-frontend-app.vercel.app"], // Replace with your actual Vercel Frontend URL after you deploy it
+    origin: ["http://localhost:3000", "https://your-frontend-app.vercel.app"], // Add your Vercel Frontend URL here later
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 }));
 
-// Serve uploaded images statically
-// NOTE: On Vercel, these files are temporary and will be deleted. 
-// Use Cloudinary for permanent storage in production.
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// Ensure upload directory exists (prevents crash on local)
-const uploadDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
-}
-
 // --- DATABASE CONNECTION ---
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB Connected'))
-  .catch(err => console.log('MongoDB Connection Error:', err));
+  .catch(err => console.log('MongoDB Error:', err));
+
+// --- CLOUDINARY CONFIG ---
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// --- MULTER STORAGE (Cloudinary) ---
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'recipes', 
+    allowed_formats: ['jpg', 'png', 'jpeg'],
+  },
+});
+
+const upload = multer({ storage: storage });
 
 // --- AUTH MIDDLEWARE ---
 const authMiddleware = (req, res, next) => {
@@ -54,21 +61,12 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
-// --- MULTER CONFIG (Image Upload) ---
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
-});
-const upload = multer({ storage });
-
 // --- ROUTES ---
 
 // 1. Register
 app.post('/api/register', async (req, res) => {
   try {
     const { username, email, password } = req.body;
-    
-    // Check if user exists
     const existingUser = await User.findOne({ email });
     if(existingUser) return res.status(400).json({ message: "User already exists" });
 
@@ -99,20 +97,13 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// 3. Create Recipe (with Image)
+// 3. Create Recipe (Using Cloudinary)
 app.post('/api/recipes', authMiddleware, upload.single('image'), async (req, res) => {
   try {
     const { title, ingredients, instructions, category, time } = req.body;
     
-    // Construct absolute URL for image if it exists
-    let imageUrl = '';
-    if (req.file) {
-        // On Localhost: http://localhost:5000/uploads/filename
-        // On Vercel: https://your-backend.vercel.app/uploads/filename (Temporary)
-        const protocol = req.protocol;
-        const host = req.get('host');
-        imageUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
-    }
+    // Cloudinary gives us the URL in req.file.path
+    const imageUrl = req.file ? req.file.path : '';
 
     const recipe = new Recipe({
       title,
@@ -120,7 +111,7 @@ app.post('/api/recipes', authMiddleware, upload.single('image'), async (req, res
       instructions,
       category,
       time,
-      imageUrl: imageUrl, 
+      imageUrl, 
       createdBy: req.user._id
     });
     await recipe.save();
@@ -130,18 +121,13 @@ app.post('/api/recipes', authMiddleware, upload.single('image'), async (req, res
   }
 });
 
-// 4. Get All Recipes (with Search & Filter)
+// 4. Get Recipes
 app.get('/api/recipes', async (req, res) => {
   try {
     const { search, category } = req.query;
     let query = {};
-
-    if (search) {
-      query.title = { $regex: search, $options: 'i' };
-    }
-    if (category && category !== 'All') {
-      query.category = category;
-    }
+    if (search) query.title = { $regex: search, $options: 'i' };
+    if (category && category !== 'All') query.category = category;
 
     const recipes = await Recipe.find(query).populate('createdBy', 'username');
     res.json(recipes);
@@ -154,11 +140,9 @@ app.get('/api/recipes', async (req, res) => {
 app.delete('/api/recipes/:id', authMiddleware, async (req, res) => {
   try {
     const recipe = await Recipe.findById(req.params.id);
-    if (!recipe) return res.status(404).json({ message: "Recipe not found" });
+    if (!recipe) return res.status(404).json({ message: "Not found" });
+    if (recipe.createdBy.toString() !== req.user._id) return res.status(403).json({ message: 'Not authorized' });
 
-    if (recipe.createdBy.toString() !== req.user._id) {
-      return res.status(403).json({ message: 'Not authorized' });
-    }
     await Recipe.findByIdAndDelete(req.params.id);
     res.json({ message: 'Recipe deleted' });
   } catch (err) {
@@ -166,20 +150,20 @@ app.delete('/api/recipes/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// 6. Test Route (To check if backend is running on Vercel)
+// 6. Test Route
 app.get('/', (req, res) => {
-    res.send("Recipe Sharing Backend is Running!");
+    res.send("API is running!");
 });
 
-// --- SERVER LISTENER & EXPORT ---
+// --- SERVER LISTENER ---
 
 const PORT = process.env.PORT || 5000;
 
-// Only run app.listen if we are NOT in a Vercel environment (Local Development)
+// This line allows Vercel to run the app as a Serverless Function
+// It only listens on a port if running LOCALLY
 if (require.main === module) {
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
 
-// Export the app for Vercel
 module.exports = app;
 
