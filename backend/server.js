@@ -19,7 +19,10 @@ app.use(express.json());
 
 // CORS Config
 app.use(cors({
-    origin: ["http://localhost:3000", "https://your-frontend-app.vercel.app"], // Add your Vercel Frontend URL here later
+    origin: [
+        "http://localhost:3000", 
+        "https://recipe-frontend-dusky.vercel.app" // <--- Your new Frontend URL
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 }));
