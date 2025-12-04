@@ -3,8 +3,12 @@ import { BrowserRouter as Router, Routes, Route, Link, useNavigate, Navigate, us
 import axios from 'axios';
 import './App.css';
 
-// Configuration
-const API_URL = 'http://localhost:5000/api';
+// ==========================================
+//             CONFIGURATION
+// ==========================================
+// This automatically picks the Vercel URL if deployed, or localhost if running locally
+const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_URL = `${BASE_URL}/api`;
 
 // ==========================================
 //             COMPONENTS
@@ -272,8 +276,9 @@ const Home = () => {
       <div className="card-grid">
         {recipes.map(recipe => (
           <div key={recipe._id} className="card">
+            {/* UPDATED: Removed localhost prefix because Cloudinary returns full URLs */}
             {recipe.imageUrl ? (
-                <img src={`http://localhost:5000${recipe.imageUrl}`} alt={recipe.title} />
+                <img src={recipe.imageUrl} alt={recipe.title} />
             ) : (
                 <div style={{height:'200px', background:'#eee', display:'flex', alignItems:'center', justifyContent:'center'}}>No Image</div>
             )}
