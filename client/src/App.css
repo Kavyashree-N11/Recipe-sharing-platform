@@ -1,0 +1,267 @@
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: #f0f2f5;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ff6b6b; /* Modern Coral Color */
+    padding: 1rem 2rem;
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar .logo {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #fff;
+    text-decoration: none;
+    letter-spacing: 1px;
+}
+
+.nav-links a {
+    color: #fff;
+    text-decoration: none;
+    margin-left: 25px;
+    font-weight: 400;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover {
+    color: #ffe6e6;
+}
+
+.nav-links button {
+    margin-left: 20px;
+    background: #fff;
+    color: #ff6b6b;
+    font-weight: 600;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    transition: all 0.3s;
+    width: auto; /* Override global button width */
+}
+
+.nav-links button:hover {
+    background: #ffe6e6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Forms (Auth & Create) */
+.auth-container, .create-recipe {
+    max-width: 500px;
+    margin: 60px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.auth-container h2, .create-recipe h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #444;
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 12px 15px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: #ff6b6b;
+}
+
+/* General Buttons */
+button {
+    width: 100%;
+    padding: 12px;
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s, transform 0.2s;
+}
+
+button:hover {
+    background: #ff5252;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+.toggle-auth {
+    text-align: center;
+    margin-top: 15px;
+    color: #555;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.toggle-auth:hover {
+    text-decoration: underline;
+    color: #ff6b6b;
+}
+
+/* Filters */
+.filters {
+    display: flex;
+    gap: 15px;
+    margin: 30px 0;
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.filters input, .filters select {
+    margin: 0;
+    border: 1px solid #eee;
+}
+
+/* Recipe Grid */
+.recipe-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.recipe-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+}
+
+.recipe-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+}
+
+.recipe-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.recipe-card h3 {
+    padding: 15px 15px 5px;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.recipe-card p {
+    padding: 0 15px 15px;
+    color: #666;
+    font-size: 0.9rem;
+    flex-grow: 1;
+}
+
+.recipe-card .category-tag {
+    font-size: 0.8rem;
+    color: #ff6b6b;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-left: 15px;
+    margin-bottom: 5px;
+    display: block;
+}
+
+/* Action Buttons (Edit & Delete) */
+.actions {
+    display: flex;
+    gap: 10px;
+    padding: 15px;
+    margin-top: auto; /* Pushes buttons to the bottom */
+}
+
+.actions a {
+    flex: 1; /* Makes the link wrap take up space */
+}
+
+.edit-btn {
+    background: #ffc107; /* Yellow */
+    color: #333;
+    width: 100%;
+}
+
+.edit-btn:hover {
+    background: #e0a800;
+}
+
+.delete-btn {
+    background: #ff4757; /* Red */
+    flex: 1;
+}
+
+.delete-btn:hover {
+    background: #e04050;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .filters {
+        flex-direction: column;
+    }
+    
+    .navbar {
+        flex-direction: column;
+        padding: 1rem;
+    }
+    
+    .nav-links {
+        margin-top: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .nav-links a {
+        margin-left: 0;
+    }
+    
+    .nav-links button {
+        margin-left: 0;
+        width: 100%;
+    }
+}

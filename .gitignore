@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Environment variables (Secrets)
+.env
+
+# User Uploads (Don't push these to GitHub)
+server/uploads/
+
+# OS generated files
+.DS_Store
+Thumbs.db
