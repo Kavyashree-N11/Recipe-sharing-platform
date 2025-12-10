@@ -3,7 +3,7 @@ To run this project:
 1. Server:
    cd server
    npm install
-   npm run dev
+   node server.js
 
 2. Client:
    cd client
